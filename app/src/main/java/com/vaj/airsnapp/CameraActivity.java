@@ -1,25 +1,48 @@
 package com.vaj.airsnapp;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Surface;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,38 +62,83 @@ public class CameraActivity extends AppCompatActivity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     String picpath;
+    FirebaseStorage storage;
+    StorageReference imagesRef;
+    private Uri filePath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
         getSupportActionBar().hide();
+        storage = FirebaseStorage.getInstance();
+
+        imagesRef = storage.getReferenceFromUrl("gs://personalcloud-df385.appspot.com");
         if(checkAndRequestPermissions(this)){
 // Create an instance of Camera
             mCamera = getCameraInstance();
-            // get Camera parameters
 
+            // get Camera parameters
 
             // Create our Preview view and set it as the content of our activity.
             mPreview = new CameraPreview(this, mCamera);
+
+
+
+
             FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
             preview.addView(mPreview);
         }
 
 
         // Add a listener to the Capture button
-        Button captureButton = (Button) findViewById(R.id.button_capture);
+        ImageView captureButton = (ImageView) findViewById(R.id.button_capture);
         captureButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         // get an image from the camera
+                        mCamera.setDisplayOrientation(90);
+
                         mCamera.takePicture(null, null, mPicture);
+                       // showPreview();
                     }
                 }
         );
 
 
     }
+
+    void showPreview()
+    {
+        findViewById(R.id.cameraArea).setVisibility(View.GONE);
+        findViewById(R.id.previewArea).setVisibility(View.VISIBLE);
+
+        ImageView previewImage=findViewById(R.id.previewImage);
+
+        filePath= Uri.fromFile(new File(picpath));
+        Config.showToast(this,"path"+picpath);
+        Picasso.get()
+                .load(filePath)
+
+                .into(previewImage);
+
+        findViewById(R.id.retakeBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCamera.stopPreview();
+                mCamera.startPreview();
+                showCameraArea();
+            }
+        });
+    }
+
+    void showCameraArea()
+    {
+        findViewById(R.id.cameraArea).setVisibility(View.VISIBLE);
+        findViewById(R.id.previewArea).setVisibility(View.GONE);
+    }
+
     /** A safe way to get an instance of the Camera object. */
     public static Camera getCameraInstance(){
         Camera c = null;
@@ -85,31 +153,286 @@ public class CameraActivity extends AppCompatActivity {
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-
+boolean cameraFront=false;
             File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null){
+            ContextWrapper cw = new ContextWrapper(getApplicationContext());
+            File directory = cw.getExternalMediaDirs()[0];
+
+
+
+            pictureFile = new File(directory, "airsnap_"+Config.getradomNumber() + ".jpg");
+
+            if (pictureFile == null) {
                 Log.d(TAG, "Error creating media file, check storage permissions");
                 return;
             }
 
             try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
+              /*  FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(data);
                 fos.close();
 
-                picpath=pictureFile.getAbsolutePath();
+
+
                 Toast.makeText(CameraActivity.this,"Stored at:"+picpath,Toast.LENGTH_LONG).show();
-                Log.d("airsnapp",picpath);
-                 refreshGallery();
+                Log.d("airsnapp",picpath);*/
+
+                picpath=pictureFile.getAbsolutePath();
+                FileOutputStream fos = new FileOutputStream(pictureFile);
+                Bitmap bm = null;
+
+                // COnverting ByteArray to Bitmap - >Rotate and Convert back to Data
+                if (data != null) {
+                    bm = BitmapFactory.decodeByteArray(data, 0, (data != null) ? data.length : 0);
+                    int screenWidth = bm.getHeight();
+                    int screenHeight = bm.getWidth();
+
+                    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        // Notice that width and height are reversed
+                        Bitmap scaled = Bitmap.createScaledBitmap(bm, screenHeight, screenWidth, true);
+                        int w = scaled.getWidth();
+                        int h = scaled.getHeight();
+                        // Setting post rotate to 90
+                        Matrix mtx = new Matrix();
+
+                        int CameraEyeValue = setPhotoOrientation(CameraActivity.this, cameraFront == true ? 1 : 0); // CameraID = 1 : front 0:back
+                        if (cameraFront) { // As Front camera is Mirrored so Fliping the Orientation
+                            if (CameraEyeValue == 270) {
+                                mtx.postRotate(90);
+                            } else if (CameraEyeValue == 90) {
+                                mtx.postRotate(270);
+                            }
+                        } else {
+                            mtx.postRotate(CameraEyeValue); // CameraEyeValue is default to Display Rotation
+                        }
+
+                        bm = Bitmap.createBitmap(scaled, 0, 0, w, h, mtx, true);
+                    } else {// LANDSCAPE MODE
+                        //No need to reverse width and height
+                        Bitmap scaled = Bitmap.createScaledBitmap(bm, screenWidth, screenHeight, true);
+                        bm = scaled;
+                    }
+                }
+                // COnverting the Die photo to Bitmap
+
+                bm=addWatermark(getResources(),bm);
+
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+
+
+
+                byte[] byteArray = stream.toByteArray();
+                fos.write(byteArray);
+                //fos.write(data);
+                fos.close();
+
+
+
+
+
+
+                 Toast.makeText(CameraActivity.this, "Picture saved: " + pictureFile.getName(), Toast.LENGTH_LONG).show();
+Log.d(TAG,pictureFile.getAbsolutePath());
+                // uploadPicToCloud();
+                showPreview();
+                refreshGallery();
             } catch (FileNotFoundException e) {
-                Log.d(TAG, "File not found: " + e.getMessage());
+                Log.d(TAG,e.getMessage());
             } catch (IOException e) {
-                Log.d(TAG, "Error accessing file: " + e.getMessage());
+
+                Log.d(TAG,e.getMessage());
             }
+
+
         }
+
     };
+
+    public static Bitmap addWatermark(Resources res, Bitmap source) {
+        int w, h;
+        Canvas c;
+        Paint paint;
+        Bitmap bmp, watermark;
+        Matrix matrix;
+        float scale;
+        RectF r;
+        w = source.getWidth();
+        h = source.getHeight();
+        // Create the new bitmap
+        bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG);
+        // Copy the original bitmap into the new one
+        c = new Canvas(bmp);
+        c.drawBitmap(source, 0, 0, paint);
+        // Load the watermark
+        watermark = BitmapFactory.decodeResource(res, R.drawable.watermark);
+        // Scale the watermark to be approximately 40% of the source image height
+        scale = (float) (((float) h * 0.04) / (float) watermark.getHeight());
+        // Create the matrix
+        matrix = new Matrix();
+        matrix.postScale(scale, scale);
+        // Determine the post-scaled size of the watermark
+        r = new RectF(0, 0, watermark.getWidth(), watermark.getHeight());
+        matrix.mapRect(r);
+        // Move the watermark to the bottom right corner
+        matrix.postTranslate(w - r.width(), h - r.height());
+        // Draw the watermark
+        c.drawBitmap(watermark, matrix, paint);
+        // Free up the bitmap memory
+        watermark.recycle();
+        return bmp;
+    }
+
+    public int setPhotoOrientation(Activity activity, int cameraId) {
+        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(cameraId, info);
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
+        }
+
+        int result;
+        // do something for phones running an SDK before lollipop
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360; // compensate the mirror
+        } else { // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+
+        return result;
+    }
+
+
+
+
+    void uploadPicToCloud()
+    {
+
+        filePath= Uri.fromFile(new File(picpath));
+
+Config.showToast(this,"Uploading to cloud..");
+Log.d(TAG,filePath+" --< file path");
+
+        //if there is a file to upload
+
+        //config.showToast(this,filePath.toString()+"kk");
+        if (filePath != null) {
+            //displaying a progress dialog while upload is going on
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+
+
+String pp=filePath.getPath();
+         //   String ext=picpath.substring(picpath.lastIndexOf("."));
+            String ext=pp.substring(pp.lastIndexOf("."));
+            final StorageReference riversRef = imagesRef.child("airsnapp/"+filePath.getLastPathSegment());
+            riversRef.putFile(filePath)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            //if the upload is successfull
+                            //hiding the progress dialog
+
+
+                            riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    progressDialog.dismiss();
+
+                                    String durl = uri.toString();
+
+
+
+
+                                    String fileURL1 = uri.getLastPathSegment();
+                                    String token = uri.getEncodedQuery().replace("alt=media&token=", "");
+                                    //config.showToast(UploadIDs.this,fileURL1);
+
+
+                                    Log.d("url", durl + "");
+
+                                }
+                            });
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            //if the upload is not successfull
+                            //hiding the progress dialog
+                            progressDialog.dismiss();
+
+                            //and displaying error message
+                            Toast.makeText(getApplicationContext(), exception.getMessage() + "fil" + picpath, Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            //calculating progress percentage
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+                            //displaying percentage in progress dialog
+                            progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+                        }
+                    });
+        }
+        //if there is not any file
+        else
+
+        {
+
+            Config.showToast(this, "error:" + picpath);
+        }
+
+    }
+
+
+    public static void setCameraDisplayOrientation(Activity activity,
+                                                   int cameraId, android.hardware.Camera camera) {
+        android.hardware.Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(cameraId, info);
+        int rotation = activity.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        camera.setDisplayOrientation(result);
+    }
     /** Check if this device has a camera */
     private boolean checkCameraHardware(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
@@ -138,13 +461,16 @@ public class CameraActivity extends AppCompatActivity {
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(picpath))));
     }
 
+
+
     /** Create a File for saving an image or video */
     private static File getOutputMediaFile(int type){
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Airsnapp");
+        //Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "airsnapp");
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "480321689797",
+    "project_id": "personalcloud-df385",
+    "storage_bucket": "personalcloud-df385.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480321689797:android:62e0fb60f674247c3e38ac",
+        "android_client_info": {
+          "package_name": "com.vaj.airsnapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480321689797-o9k24hd06gufrkfungklt66pj936v53j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxi806U1WRQdbp29KjRRHpXRbq82NDpxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480321689797-o9k24hd06gufrkfungklt66pj936v53j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

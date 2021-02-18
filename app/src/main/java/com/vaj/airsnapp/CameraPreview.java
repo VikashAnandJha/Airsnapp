@@ -53,6 +53,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // stop preview before making changes
         try {
             mCamera.stopPreview();
+            mCamera.setDisplayOrientation(90);
         } catch (Exception e){
             // ignore: tried to stop a non-existent preview
         }
