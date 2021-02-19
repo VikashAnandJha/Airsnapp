@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +24,11 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
+import io.github.inflationx.calligraphy3.CalligraphyConfig;
+import io.github.inflationx.calligraphy3.CalligraphyInterceptor;
+import io.github.inflationx.viewpump.ViewPump;
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
+
 public class PreviewImageActivity extends AppCompatActivity {
 Uri filePath;
 String picpath;
@@ -30,11 +36,24 @@ String picpath;
     StorageReference imagesRef;
     String TAG="airsnapp Preview image";
     TextView uploadPercentTv;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview_image);
         getSupportActionBar().hide();
+        ViewPump.init(ViewPump.builder()
+                .addInterceptor(new CalligraphyInterceptor(
+                        new CalligraphyConfig.Builder()
+                                .setDefaultFontPath("fonts/Roboto-Bold.ttf")
+                                .setFontAttrId(R.attr.fontPath)
+                                .build()))
+                .build());
 
         ImageView previewImage=findViewById(R.id.previewImage);
         storage = FirebaseStorage.getInstance();
@@ -42,8 +61,11 @@ String picpath;
         uploadPercentTv=findViewById(R.id.uploadPercent);
 
         imagesRef = storage.getReferenceFromUrl("gs://personalcloud-df385.appspot.com");
-        picpath="/storage/emulated/0/Android/media/com.vaj.airsnapp/airsnap_1613690356626.jpg";
+
         picpath=getIntent().getStringExtra("picpath");
+        if(picpath==null){
+            picpath="/storage/emulated/0/Android/media/com.vaj.airsnapp/airsnap_1613690356626.jpg";
+        }
 
 if(picpath!=null){
     filePath= Uri.fromFile(new File(picpath));

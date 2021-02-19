@@ -2,17 +2,34 @@ package com.vaj.airsnapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-public class SplashActivity extends AppCompatActivity {
+import io.github.inflationx.calligraphy3.CalligraphyConfig;
+import io.github.inflationx.calligraphy3.CalligraphyInterceptor;
+import io.github.inflationx.viewpump.ViewPump;
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 
+public class SplashActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        ViewPump.init(ViewPump.builder()
+                .addInterceptor(new CalligraphyInterceptor(
+                        new CalligraphyConfig.Builder()
+                                .setDefaultFontPath("fonts/Roboto-Bold.ttf")
+                                .setFontAttrId(R.attr.fontPath)
+                                .build()))
+                .build());
+
         getSupportActionBar().hide();
 
         TextView versionTv=findViewById(R.id.versionText);

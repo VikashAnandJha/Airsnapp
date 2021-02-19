@@ -72,35 +72,31 @@
             android:layout_marginTop="10dp"
             android:textColor="#568EFB"
             />
-            <com.rilixtech.materialfancybutton.MaterialFancyButton
+            <Button
                 android:id="@+id/viewInAirGallery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="View In AirSnap Gallery"
-                app:mfb_textSize="25dp"
-                app:mfb_fontIconSize="25dp"
-                app:mfb_defaultColor="@color/btn2"
-                android:padding="5dp"
+                android:textColor="@color/white"
+                android:layout_weight="0.5"
+                android:gravity="center"
                 android:layout_margin="5dp"
+                android:background="@color/bgcolor"
 
-
-                fancy:mfb_icon="@string/fawi_file_image_o"/>
-            <com.rilixtech.materialfancybutton.MaterialFancyButton
+                />
+            <Button
 
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Take New Photo"
-                android:background="@color/btn1"
-                app:mfb_defaultColor="@color/btn3"
+
                 android:id="@+id/retakeBtn2"
-                app:mfb_textSize="25dp"
-                app:mfb_fontIconSize="25dp"
-                android:padding="5dp"
+                android:textColor="@color/white"
+                android:layout_weight="0.5"
+                android:gravity="center"
                 android:layout_margin="5dp"
-
-
-
-                fancy:mfb_icon="@string/fawi_camera"/>
+                android:background="@color/bgcolor"
+/>
     </LinearLayout>
 
         <ImageView
@@ -127,34 +123,31 @@
         android:id="@+id/bottomActions"
         android:layout_height="wrap_content">
 
-        <com.rilixtech.materialfancybutton.MaterialFancyButton
+        <Button
             android:id="@+id/saveCoud"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SAVE Cloud "
+
+            android:textColor="@color/white"
             android:layout_weight="0.5"
-            app:mfb_textSize="25dp"
-            app:mfb_fontIconSize="25dp"
-            app:mfb_defaultColor="@color/btn2"
-            android:padding="5dp"
+            android:gravity="center"
 
-
-            fancy:mfb_icon="@string/fawi_cloud_upload"/>
-        <com.rilixtech.materialfancybutton.MaterialFancyButton
+            android:layout_marginRight="1dp"
+            android:background="@color/bgcolor"/>
+        <Button
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="RETAKE"
-            android:background="@color/btn1"
-            app:mfb_defaultColor="@color/btn3"
+            android:text="RETAKE PIC"
             android:id="@+id/retakeBtn"
-            app:mfb_textSize="25dp"
-            app:mfb_fontIconSize="25dp"
-            android:padding="5dp"
+            android:textColor="@color/white"
             android:layout_weight="0.5"
+            android:gravity="center"
+            android:layout_marginLeft="1dp"
+            android:background="@color/bgcolor"
 
-
-            fancy:mfb_icon="@string/fawi_camera"/>
+            />
 
     </LinearLayout>
 </RelativeLayout>

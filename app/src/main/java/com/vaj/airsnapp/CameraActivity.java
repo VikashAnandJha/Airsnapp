@@ -215,7 +215,7 @@ boolean cameraFront=false;
 
 
 
-                 Toast.makeText(CameraActivity.this, "Picture saved: " + pictureFile.getName(), Toast.LENGTH_LONG).show();
+                 Toast.makeText(CameraActivity.this, "Picture saved: Android/media/" + pictureFile.getName(), Toast.LENGTH_LONG).show();
 Log.d(TAG,pictureFile.getAbsolutePath());
                 // uploadPicToCloud();
                 showPreview();
