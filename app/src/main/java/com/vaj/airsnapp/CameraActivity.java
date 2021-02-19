@@ -71,10 +71,7 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
 
         getSupportActionBar().hide();
-        storage = FirebaseStorage.getInstance();
-
-        imagesRef = storage.getReferenceFromUrl("gs://personalcloud-df385.appspot.com");
-        if(checkAndRequestPermissions(this)){
+       if(checkAndRequestPermissions(this)){
 // Create an instance of Camera
             mCamera = getCameraInstance();
 
@@ -111,32 +108,14 @@ public class CameraActivity extends AppCompatActivity {
 
     void showPreview()
     {
-        findViewById(R.id.cameraArea).setVisibility(View.GONE);
-        findViewById(R.id.previewArea).setVisibility(View.VISIBLE);
-
-        ImageView previewImage=findViewById(R.id.previewImage);
-
-        filePath= Uri.fromFile(new File(picpath));
-        Config.showToast(this,"path"+picpath);
-        Picasso.get()
-                .load(filePath)
-
-                .into(previewImage);
-
-        findViewById(R.id.retakeBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCamera.stopPreview();
-                mCamera.startPreview();
-                showCameraArea();
-            }
-        });
+        Intent intent=new Intent(this,PreviewImageActivity.class);
+        intent.putExtra("picpath",picpath);
+        startActivity(intent);
     }
 
     void showCameraArea()
     {
-        findViewById(R.id.cameraArea).setVisibility(View.VISIBLE);
-        findViewById(R.id.previewArea).setVisibility(View.GONE);
+
     }
 
     /** A safe way to get an instance of the Camera object. */
@@ -323,90 +302,7 @@ Log.d(TAG,pictureFile.getAbsolutePath());
 
 
 
-    void uploadPicToCloud()
-    {
 
-        filePath= Uri.fromFile(new File(picpath));
-
-Config.showToast(this,"Uploading to cloud..");
-Log.d(TAG,filePath+" --< file path");
-
-        //if there is a file to upload
-
-        //config.showToast(this,filePath.toString()+"kk");
-        if (filePath != null) {
-            //displaying a progress dialog while upload is going on
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading");
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-
-
-
-String pp=filePath.getPath();
-         //   String ext=picpath.substring(picpath.lastIndexOf("."));
-            String ext=pp.substring(pp.lastIndexOf("."));
-            final StorageReference riversRef = imagesRef.child("airsnapp/"+filePath.getLastPathSegment());
-            riversRef.putFile(filePath)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            //if the upload is successfull
-                            //hiding the progress dialog
-
-
-                            riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    progressDialog.dismiss();
-
-                                    String durl = uri.toString();
-
-
-
-
-                                    String fileURL1 = uri.getLastPathSegment();
-                                    String token = uri.getEncodedQuery().replace("alt=media&token=", "");
-                                    //config.showToast(UploadIDs.this,fileURL1);
-
-
-                                    Log.d("url", durl + "");
-
-                                }
-                            });
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            //if the upload is not successfull
-                            //hiding the progress dialog
-                            progressDialog.dismiss();
-
-                            //and displaying error message
-                            Toast.makeText(getApplicationContext(), exception.getMessage() + "fil" + picpath, Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            //calculating progress percentage
-                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-
-                            //displaying percentage in progress dialog
-                            progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                        }
-                    });
-        }
-        //if there is not any file
-        else
-
-        {
-
-            Config.showToast(this, "error:" + picpath);
-        }
-
-    }
 
 
     public static void setCameraDisplayOrientation(Activity activity,

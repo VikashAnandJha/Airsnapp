@@ -48,53 +48,6 @@
             android:layout_margin="5dp"
             />
     </RelativeLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:id="@+id/previewArea"
-        android:visibility="gone"
-        android:padding="10dp"
-        android:layout_height="wrap_content">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="400dp"
-            android:maxHeight="400dp"
-            android:id="@+id/previewImage"
-            android:src="@drawable/airsnap"
-            />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_height="wrap_content">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SAVE LOCAL"
-
-                />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SAVE CLOUD"
-
-                />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="RETAKE PIC"
-                android:id="@+id/retakeBtn"
-
-                />
-        </LinearLayout>
-
-
-
-    </LinearLayout>
 
 
 

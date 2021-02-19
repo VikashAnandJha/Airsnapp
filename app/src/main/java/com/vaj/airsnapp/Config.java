@@ -10,6 +10,7 @@ public class Config {
     static public final String APP_VERSION="1.00";
 
     static public final int UID=1;
+    static public final String current_username="vikashjha";
     static public final String BASE="http://vikashanandjha.com/";
     // static public final String BASE="http://192.168.43.30/";
     static public final String BASE_URL=BASE+"/APIv2/";

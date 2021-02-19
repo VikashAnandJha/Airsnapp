@@ -20,14 +20,44 @@
 
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_margin="50dp"
+        android:gravity="center"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:layout_width="250dp"
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:padding="10dp"
+            android:background="@color/bgcolor"
+            android:src="@drawable/ic_diaphragm"
+
+            android:id="@+id/launchCameraBtn"
+            android:layout_margin="5dp"
+            />
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:padding="10dp"
+            android:layout_margin="5dp"
+            android:background="@color/bgcolor"
+            android:src="@drawable/ic_gallery"
+
+            android:id="@+id/viewInAirGallery"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Launch Camera"
+        android:text="v1.0.9"
+        android:id="@+id/versionText"
         android:textColor="@color/white"
-        android:background="@color/bgcolor"
-        android:id="@+id/launchCameraBtn"
+        android:textStyle="bold"
         />
+
 
 </LinearLayout>

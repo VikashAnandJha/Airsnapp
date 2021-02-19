@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
+    tools:context=".PreviewImageActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/previewArea"
+        android:visibility="visible"
+        android:padding="10dp"
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:src="@drawable/airsnap"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone"
+            android:id="@+id/uploadArea"
+            android:layout_height="wrap_content">
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/animation_view"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+
+                app:lottie_fileName="cloudanim1.json"
+
+                app:lottie_loop="true"
+
+                app:lottie_autoPlay="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="50dp"
+                android:text="00%"
+                android:id="@+id/uploadPercent"
+                android:layout_marginTop="10dp"
+                android:textColor="#568EFB"
+                />
+        </LinearLayout>
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+            android:visibility="gone"
+            android:id="@+id/successArea"
+        android:layout_height="wrap_content">
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+
+            app:lottie_fileName="uploaded.json"
+
+            app:lottie_loop="true"
+
+            app:lottie_autoPlay="true" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30dp"
+            android:text="Pic Saved To Cloud"
+            android:layout_marginTop="10dp"
+            android:textColor="#568EFB"
+            />
+            <com.rilixtech.materialfancybutton.MaterialFancyButton
+                android:id="@+id/viewInAirGallery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="View In AirSnap Gallery"
+                app:mfb_textSize="25dp"
+                app:mfb_fontIconSize="25dp"
+                app:mfb_defaultColor="@color/btn2"
+                android:padding="5dp"
+                android:layout_margin="5dp"
+
+
+                fancy:mfb_icon="@string/fawi_file_image_o"/>
+            <com.rilixtech.materialfancybutton.MaterialFancyButton
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Take New Photo"
+                android:background="@color/btn1"
+                app:mfb_defaultColor="@color/btn3"
+                android:id="@+id/retakeBtn2"
+                app:mfb_textSize="25dp"
+                app:mfb_fontIconSize="25dp"
+                android:padding="5dp"
+                android:layout_margin="5dp"
+
+
+
+                fancy:mfb_icon="@string/fawi_camera"/>
+    </LinearLayout>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:maxHeight="400dp"
+            android:layout_margin="50dp"
+            android:id="@+id/previewImage"
+            android:src="@drawable/airsnap_1613690382174"
+            />
+
+
+
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:weightSum="1"
+        android:id="@+id/bottomActions"
+        android:layout_height="wrap_content">
+
+        <com.rilixtech.materialfancybutton.MaterialFancyButton
+            android:id="@+id/saveCoud"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SAVE Cloud "
+            android:layout_weight="0.5"
+            app:mfb_textSize="25dp"
+            app:mfb_fontIconSize="25dp"
+            app:mfb_defaultColor="@color/btn2"
+            android:padding="5dp"
+
+
+            fancy:mfb_icon="@string/fawi_cloud_upload"/>
+        <com.rilixtech.materialfancybutton.MaterialFancyButton
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RETAKE"
+            android:background="@color/btn1"
+            app:mfb_defaultColor="@color/btn3"
+            android:id="@+id/retakeBtn"
+            app:mfb_textSize="25dp"
+            app:mfb_fontIconSize="25dp"
+            android:padding="5dp"
+            android:layout_weight="0.5"
+
+
+            fancy:mfb_icon="@string/fawi_camera"/>
+
+    </LinearLayout>
+</RelativeLayout>
